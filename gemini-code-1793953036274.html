@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echoes of Myself</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Inter:wght@300;400;500;600&family=Courier+Prime:wght@400;700&family=Lora:ital,wght@0,400..600;1,400..600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #171717;
+            --bg-secondary: #212121;
+            --bg-card: #282828;
+            --border-color: #383838;
+            --text-main: #f5f5f5;
+            --text-muted: #a3a3a3;
+            --accent: #d4a373;
+            --accent-hover: #e9edc9;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* App Header */
+        header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .brand h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            letter-spacing: 0.5px;
+            color: var(--text-main);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Buttons & Inputs */
+        button, .btn {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        button:hover, .btn:hover {
+            background-color: var(--border-color);
+            border-color: var(--text-muted);
+        }
+
+        button.primary {
+            background-color: var(--accent);
+            color: #111;
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        button.primary:hover {
+            background-color: #c28e5f;
+        }
+
+        input, select {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+        }
+
+        /* Main View Containers */
+        main {
+            flex: 1;
+            padding: 32px 24px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Home View - Folder Grid */
+        .home-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+        }
+
+        .home-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+        }
+
+        .folder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .folder-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .folder-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .folder-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .folder-card p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .folder-delete {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 4px;
+            font-size: 0.8rem;
+        }
+
+        .folder-delete:hover {
+            color: var(--danger);
+            background: none;
+        }
+
+        /* Workspace View (Code-space style) */
+        .workspace-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 24px;
+            height: calc(100vh - 140px);
+        }
+
+        @media (max-width: 768px) {
+            .workspace-layout {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+
+        .sidebar {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .file-item {
+            padding: 10px 12px;
+            border-radius: 6px;
+            background-color: var(--bg-card);
+            border: 1px solid transparent;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .file-item:hover {
+            border-color: var(--border-color);
+        }
+
+        .file-item.active {
+            border-color: var(--accent);
+            background-color: rgba(212, 163, 115, 0.05);
+        }
+
+        /* Editor Section */
+        .editor-container {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .editor-toolbar {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .editor-toolbar select, .editor-toolbar button {
+            background-color: var(--bg-secondary);
+        }
+
+        .editor-title-input {
+            border: none;
+            background: transparent;
+            font-size: 1.3rem;
+            font-family: 'Playfair Display', serif;
+            color: var(--text-main);
+            padding: 12px 16px 0 16px;
+            width: 100%;
+            outline: none;
+        }
+
+        .editor-body {
+            flex: 1;
+            padding: 16px;
+            outline: none;
+            overflow-y: auto;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .editor-footer {
+            padding: 10px 16px;
+            background-color: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Modal Overlays */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal-content h3 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: var(--accent);
+            color: #111;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1100;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand" onclick="switchView('home')">
+            <h1>Echoes of Myself</h1>
+        </div>
+        <div class="header-actions">
+            <button onclick="exportAllData()">Backup Data</button>
+            <button class="primary" onclick="openNewFolderModal()">+ New Folder</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- HOME VIEW -->
+        <section id="home-view" class="view active">
+            <div class="home-header">
+                <h2>Your Journal Folders</h2>
+                <button class="primary" onclick="openNewFolderModal()">Create Folder</button>
+            </div>
+            <div id="folder-grid" class="folder-grid">
+                <!-- Folders dynamically injected here -->
+            </div>
+        </section>
+
+        <!-- WORKSPACE VIEW -->
+        <section id="workspace-view" class="view">
+            <div class="workspace-layout">
+                <!-- Sidebar Files -->
+                <div class="sidebar">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 id="current-folder-title" style="font-family: 'Playfair Display', serif;">Folder</h3>
+                        <button class="primary" onclick="createNewFile()">+ New Note</button>
+                    </div>
+                    <button onclick="switchView('home')" style="width: 100%; text-align: center;">← Back to Home</button>
+                    <hr style="border-color: var(--border-color);">
+                    <div id="file-list" class="file-list">
+                        <!-- Files dynamically injected here -->
+                    </div>
+                </div>
+
+                <!-- Editor Workspace -->
+                <div class="editor-container">
+                    <div class="editor-toolbar">
+                        <select id="font-family-select" onchange="applyFormatting('fontName', this.value)">
+                            <option value="Inter">Sans-Serif (Inter)</option>
+                            <option value="Playfair Display">Journal Serif (Playfair)</option>
+                            <option value="Lora">Classic Book (Lora)</option>
+                            <option value="Courier Prime">Typewriter (Courier)</option>
+                        </select>
+                        <select id="font-size-select" onchange="applyFontSize(this.value)">
+                            <option value="3">Normal (16px)</option>
+                            <option value="4">Medium (18px)</option>
+                            <option value="5">Large (22px)</option>
+                            <option value="6">Heading (28px)</option>
+                        </select>
+                        <button onclick="applyFormatting('bold')"><b>B</b></button>
+                        <button onclick="applyFormatting('italic')"><i>I</i></button>
+                        <button onclick="applyFormatting('underline')"><u>U</u></button>
+                        <button onclick="copyToClipboard()">📋 Copy Text</button>
+                        <button onclick="shareText()">📤 Share</button>
+                    </div>
+                    <input type="text" id="file-title-input" class="editor-title-input" placeholder="Note Title..." oninput="updateActiveFileName()">
+                    <div id="editor-body" class="editor-body" contenteditable="true" oninput="autoSaveCurrentNote()" placeholder="Write your thoughts here..."></div>
+                    <div class="editor-footer">
+                        <span id="save-status">Saved automatically</span>
+                        <span id="word-count">0 words</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Folder Creation -->
+    <div id="folder-modal" class="modal">
+        <div class="modal-content">
+            <h3>Create New Folder</h3>
+            <input type="text" id="new-folder-name" placeholder="Folder Name (e.g. Journal, Ideas)">
+            <div class="modal-actions">
+                <button onclick="closeNewFolderModal()">Cancel</button>
+                <button class="primary" onclick="confirmCreateFolder()">Save Folder</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Copied to clipboard!</div>
+
+    <script>
+        // LocalStorage App State Initialization
+        let appData = JSON.parse(localStorage.getItem('echoes_of_myself_data')) || {
+            folders: [
+                { id: '1', name: 'Personal Reflections', files: [{ id: 'f1', title: 'First Entry', content: 'Welcome to Echoes of Myself. Start writing your thoughts here...', updatedAt: new Date().toISOString() }] }
+            ]
+        };
+
+        let currentFolderId = null;
+        let currentFileId = null;
+        let saveTimeout = null;
+
+        function saveToStorage() {
+            localStorage.setItem('echoes_of_myself_data', JSON.stringify(appData));
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            if (viewName === 'home') {
+                document.getElementById('home-view').classList.add('active');
+                renderFolders();
+            } else if (viewName === 'workspace') {
+                document.getElementById('workspace-view').classList.add('active');
+            }
+        }
+
+        // --- Folder Management ---
+        function renderFolders() {
+            const grid = document.getElementById('folder-grid');
+            grid.innerHTML = '';
+            
+            if(appData.folders.length === 0) {
+                grid.innerHTML = `<p style="color: var(--text-muted);">No folders created yet. Click "+ New Folder" to begin.</p>`;
+                return;
+            }
+
+            appData.folders.forEach(folder => {
+                const card = document.createElement('div');
+                card.className = 'folder-card';
+                card.innerHTML = `
+                    <button class="folder-delete" onclick="event.stopPropagation(); deleteFolder('${folder.id}')" title="Delete Folder">×</button>
+                    <h3>${escapeHtml(folder.name)}</h3>
+                    <p>${folder.files.length} note page(s)</p>
+                `;
+                card.onclick = () => openFolder(folder.id);
+                grid.appendChild(card);
+            });
+        }
+
+        function openNewFolderModal() {
+            document.getElementById('new-folder-name').value = '';
+            document.getElementById('folder-modal').classList.add('open');
+            document.getElementById('new-folder-name').focus();
+        }
+
+        function closeNewFolderModal() {
+            document.getElementById('folder-modal').classList.remove('open');
+        }
+
+        function confirmCreateFolder() {
+            const nameInput = document.getElementById('new-folder-name');
+            const folderName = nameInput.value.trim();
+            if (!folderName) return;
+
+            const newFolder = {
+                id: 'folder_' + Date.now(),
+                name: folderName,
+                files: [{
+                    id: 'file_' + Date.now(),
+                    title: 'Untitled Note',
+                    content: '',
+                    updatedAt: new Date().toISOString()
+                }]
+            };
+
+            appData.folders.push(newFolder);
+            saveToStorage();
+            closeNewFolderModal();
+            renderFolders();
+            showToast('Folder created!');
+        }
+
+        function deleteFolder(folderId) {
+            if (confirm('Are you sure you want to delete this folder and all its note pages?')) {
+                appData.folders = appData.folders.filter(f => f.id !== folderId);
+                saveToStorage();
+                renderFolders();
+            }
+        }
+
+        // --- Workspace & File Management ---
+        function openFolder(folderId) {
+            currentFolderId = folderId;
+            const folder = appData.folders.find(f => f.id === folderId);
+            if (!folder) return;
+
+            document.getElementById('current-folder-title').textContent = folder.name;
+            switchView('workspace');
+            renderFiles();
+
+            if (folder.files.length > 0) {
+                selectFile(folder.files[0].id);
+            } else {
+                createNewFile();
+            }
+        }
+
+        function renderFiles() {
+            const folder = appData.folders.find(f => f.id === currentFolderId);
+            const listContainer = document.getElementById('file-list');
+            listContainer.innerHTML = '';
+
+            if (!folder) return;
+
+            folder.files.forEach(file => {
+                const item = document.createElement('div');
+                item.className = `file-item ${file.id === currentFileId ? 'active' : ''}`;
+                item.innerHTML = `
+                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">${escapeHtml(file.title || 'Untitled Note')}</span>
+                    <button onclick="event.stopPropagation(); deleteFile('${file.id}')" style="background:none; border:none; color:var(--text-muted); font-size:0.8rem; padding:2px 6px;">×</button>
+                `;
+                item.onclick = () => selectFile(file.id);
+                listContainer.appendChild(item);
+            });
+        }
+
+        function createNewFile() {
+            const folder = appData.folders.find(f => f.id === currentFolderId);
+            if (!folder) return;
+
+            const newFile = {
+                id: 'file_' + Date.now(),
+                title: 'Untitled Note',
+                content: '',
+                updatedAt: new Date().toISOString()
+            };
+
+            folder.files.unshift(newFile);
+            saveToStorage();
+            renderFiles();
+            selectFile(newFile.id);
+        }
+
+        function selectFile(fileId) {
+            currentFileId = fileId;
+            const folder = appData.folders.find(f => f.id === currentFolderId);
+            const file = folder.files.find(f => f.id === fileId);
+            if (!file) return;
+
+            document.getElementById('file-title-input').value = file.title;
+            document.getElementById('editor-body').innerHTML = file.content;
+            updateWordCount();
+            renderFiles();
+        }
+
+        function deleteFile(fileId) {
+            const folder = appData.folders.find(f => f.id === currentFolderId);
+            if (!folder) return;
+
+            folder.files = folder.files.filter(f => f.id !== fileId);
+            saveToStorage();
+
+            if (folder.files.length === 0) {
+                createNewFile();
+            } else {
+                selectFile(folder.files[0].id);
+            }
+        }
+
+        function updateActiveFileName() {
+            const title = document.getElementById('file-title-input').value;
+            const folder = appData.folders.find(f => f.id === currentFolderId);
+            const file = folder.files.find(f => f.id === currentFileId);
+            if (file) {
+                file.title = title;
+                renderFiles();
+                triggerSaveIndicator();
+            }
+        }
+
+        function autoSaveCurrentNote() {
+            const content = document.getElementById('editor-body').innerHTML;
+            const folder = appData.folders.find(f => f.id === currentFolderId);
+            const file = folder.files.find(f => f.id === currentFileId);
+            if (file) {
+                file.content = content;
+                file.updatedAt = new Date().toISOString();
+                triggerSaveIndicator();
+                updateWordCount();
+            }
+        }
+
+        function triggerSaveIndicator() {
+            const status = document.getElementById('save-status');
+            status.textContent = 'Saving...';
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveToStorage();
+                status.textContent = 'Saved automatically';
+            }, 500);
+        }
+
+        function updateWordCount() {
+            const text = document.getElementById('editor-body').innerText || '';
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            document.getElementById('word-count').textContent = `${words} words`;
+        }
+
+        // --- Rich Text Controls ---
+        function applyFormatting(command, value = null) {
+            document.execCommand(command, false, value);
+            document.getElementById('editor-body').focus();
+            autoSaveCurrentNote();
+        }
+
+        function applyFontSize(sizeValue) {
+            document.execCommand('fontSize', false, sizeValue);
+            document.getElementById('editor-body').focus();
+            autoSaveCurrentNote();
+        }
+
+        function copyToClipboard() {
+            const bodyText = document.getElementById('editor-body').innerText;
+            navigator.clipboard.writeText(bodyText).then(() => {
+                showToast('Copied text to clipboard!');
+            });
+        }
+
+        function shareText() {
+            const title = document.getElementById('file-title-input').value;
+            const bodyText = document.getElementById('editor-body').innerText;
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    text: bodyText,
+                }).catch(() => {});
+            } else {
+                copyToClipboard();
+            }
+        }
+
+        function exportAllData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "echoes_of_myself_backup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        // Initial render
+        renderFolders();
+    </script>
+</body>
+</html>
